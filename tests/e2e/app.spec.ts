@@ -136,3 +136,61 @@ for (const dtab of ['messages', 'request', 'response', 'analysis']) {
     await expect(page.locator(`.dtab[data-dtab="${dtab}"]`)).toHaveCount(1);
   });
 }
+
+// ─── offProxy 안전성 ─────────────────────────────────────────────────────────
+
+test('모든 offProxy 호출이 안전하게 보호됨 (guard 또는 optional chaining)', () => {
+  const html = fs.readFileSync(path.join(ROOT, 'public/index.html'), 'utf8');
+
+  // toggleProxy 내부: electronAPI guard가 try 블록 첫줄에 존재
+  const toggleProxyMatch = html.match(/async function toggleProxy\(\)[\s\S]*?try\s*\{([^}]*?)if \(proxyRunning\)/);
+  expect(toggleProxyMatch).not.toBeNull();
+  expect(toggleProxyMatch![1]).toContain('if (!window.electronAPI)');
+
+  // 페이지 로드 sync: optional chaining 사용
+  const syncBlock = html.match(/프록시 상태 동기화[\s\S]*?\}\)\(\)/);
+  expect(syncBlock).not.toBeNull();
+  // offProxy in sync block should use optional chaining
+  const syncOffProxy = syncBlock![0].match(/electronAPI\?\.offProxy\?\.\(\)/);
+  expect(syncOffProxy).not.toBeNull();
+});
+
+test('프록시 토글 시 pageerror 없음', async () => {
+  const pageErrors: string[] = [];
+  const handler = (err: Error) => pageErrors.push(err.message);
+  page.on('pageerror', handler);
+
+  try {
+    const btn = page.locator('#proxyStartBtn');
+    await btn.click();
+    await expect(btn).not.toBeDisabled({ timeout: 5000 });
+    await page.waitForTimeout(300);
+
+    // stop
+    await btn.click();
+    await expect(btn).not.toBeDisabled({ timeout: 5000 });
+    await page.waitForTimeout(300);
+
+    const offProxyErrors = pageErrors.filter(e => e.includes('offProxy') || e.includes('electronAPI'));
+    expect(offProxyErrors).toHaveLength(0);
+  } finally {
+    page.removeListener('pageerror', handler);
+  }
+});
+
+test('프록시 시작→정지 전체 사이클 정상 동작', async () => {
+  const btn = page.locator('#proxyStartBtn');
+  const portInput = page.locator('#proxyPort');
+
+  // 시작
+  await btn.click();
+  await expect(btn).not.toBeDisabled({ timeout: 5000 });
+
+  // 포트 값 존재 확인
+  const port = await portInput.inputValue();
+  expect(Number(port)).toBeGreaterThan(0);
+
+  // 정지
+  await btn.click();
+  await expect(btn).not.toBeDisabled({ timeout: 5000 });
+});

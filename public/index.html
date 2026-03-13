@@ -1107,6 +1107,7 @@ async function toggleProxy() {
   if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spin"></span>'; }
 
   try {
+    if (!window.electronAPI) throw new Error('electronAPI not available');
     if (proxyRunning) {
       await window.electronAPI.proxyStop();
       window.electronAPI.offProxy();
@@ -2211,7 +2212,7 @@ document.getElementById('proxyPanel').style.display = 'flex';
       proxyActualPort = st.port;
       document.getElementById('proxyPort').value = st.port;
       // 이벤트 리스너 재등록
-      window.electronAPI.offProxy();
+      window.electronAPI?.offProxy?.();
       window.electronAPI.onProxyRequest((data) => {
         proxyCaptures.unshift(data);
         if (proxyCaptures.length > 50) proxyCaptures.pop();
