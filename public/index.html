@@ -27,10 +27,14 @@
       background: var(--surface); border-bottom: 1px solid var(--border);
       flex-shrink: 0; gap: 12px;
     }
-    /* ── Window drag (macOS hiddenInset) ── */
+    /* ── Window drag (macOS titlebar) ── */
+    .titlebar {
+      display: none; height: 28px; flex-shrink: 0;
+      background: var(--surface); -webkit-app-region: drag;
+    }
+    body.darwin .titlebar { display: block; }
     .header { -webkit-app-region: drag; }
     .header-right, .header-right *, .logo { -webkit-app-region: no-drag; }
-    body.darwin .header { padding-left: 76px; }
 
     .logo { display: flex; align-items: center; gap: 9px; }
     .logo-icon {
@@ -496,6 +500,7 @@
   </div>
 </div>
 
+<div class="titlebar"></div>
 <header class="header">
   <div class="logo">
     <div class="logo-icon">CI</div>
