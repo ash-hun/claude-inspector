@@ -648,11 +648,20 @@
     }
     .jt-tag:hover { color: var(--text); }
     .proxy-token-pill {
-      padding: 4px 12px;
+      padding: 6px 12px;
       font-size: 11px;
       color: var(--dim);
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .tt-badge {
+      background: rgba(255,255,255,0.06);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: 'SF Mono', monospace;
     }
     .analysis-block .jt-row { white-space: normal; }
     .analysis-kv { display: flex; gap: 8px; font-size: 11px; font-family: 'SF Mono', monospace; }
@@ -1656,11 +1665,12 @@ function collectCfg() {
 
 // ─── JSON Tree Viewer ─────────────────────────────────────────────────────
 let _jtId = 0;
-function buildJsonHtml(val, depth) {
+function buildJsonHtml(val, depth, trailing) {
   depth = depth || 0;
-  if (val === null) return '<span class="jt-null">null</span>';
-  if (val === true || val === false) return `<span class="jt-bool">${val}</span>`;
-  if (typeof val === 'number') return `<span class="jt-num">${val}</span>`;
+  trailing = trailing || '';
+  if (val === null) return '<span class="jt-null">null</span>' + trailing;
+  if (val === true || val === false) return `<span class="jt-bool">${val}</span>` + trailing;
+  if (typeof val === 'number') return `<span class="jt-num">${val}</span>` + trailing;
   if (typeof val === 'string') {
     const COLLAPSE_LEN = 300;
     if (val.length > COLLAPSE_LEN) {
@@ -1673,32 +1683,32 @@ function buildJsonHtml(val, depth) {
         + `<span class="jt-str-expanded" id="${sid}-b" style="display:none">`
         + `<span class="jt-str-toggle" onclick="jtStrToggle('${sid}')">▼</span>`
         + `"${expanded}"</span>`
-        + `</span>`;
+        + `</span>` + trailing;
     }
-    return `<span class="jt-str">"${esc(val)}"</span>`;
+    return `<span class="jt-str">"${esc(val)}"</span>` + trailing;
   }
 
   const isArr = Array.isArray(val);
   const entries = isArr ? val.map((v, i) => [null, v]) : Object.entries(val);
   const open = isArr ? '[' : '{'; const close = isArr ? ']' : '}';
-  if (entries.length === 0) return `<span>${open}${close}</span>`;
+  if (entries.length === 0) return `<span>${open}${close}</span>` + trailing;
 
   const id = `jt${++_jtId}`;
   const label = isArr ? `${entries.length}` : `${entries.length}`;
   const rows = entries.map(([k, v], i) => {
     const comma = i < entries.length - 1 ? '<span style="color:var(--dim)">,</span>' : '';
     const keyPart = k !== null ? `<span class="jt-key">"${esc(String(k))}"</span><span style="color:var(--dim)">: </span>` : '';
-    return `<div class="jt-row" style="padding-left:16px">${keyPart}${buildJsonHtml(v, depth + 1)}${comma}</div>`;
+    return `<div class="jt-row" style="padding-left:16px">${keyPart}${buildJsonHtml(v, depth + 1, comma)}</div>`;
   }).join('');
   const typeTag = isArr ? `[${label}]` : `{${label}}`;
 
   return `<span>`
     + `<span class="jt-btn" id="${id}-btn" onclick="jtToggle('${id}')">▼</span>`
     + `<span style="color:var(--dim)">${open}</span>`
-    + `<span class="jt-tag" id="${id}-s" onclick="jtToggle('${id}')" style="display:none">${typeTag}</span>`
+    + `<span class="jt-tag" id="${id}-s" onclick="jtToggle('${id}')" style="display:none">${typeTag}${trailing}</span>`
     + `<span id="${id}-b">`
     +   rows
-    +   `<div><span style="color:var(--dim)">${close}</span></div>`
+    +   `<div class="jt-row"><span style="color:var(--dim)">${close}</span>${trailing}</div>`
     + `</span>`
     + `</span>`;
 }
@@ -2885,7 +2895,10 @@ function renderProxyDetail() {
         const bytes = new TextEncoder().encode(JSON.stringify(data)).length;
         const kb = (bytes / 1024).toFixed(1);
         const tokens = Math.ceil(bytes / 3.5);
-        return `<div class="proxy-token-pill">${kb} KB · ~${tokens.toLocaleString()} tok</div>`;
+        const tokStr = tokens >= 1000000 ? (tokens / 1000000).toFixed(1) + 'M'
+                     : tokens >= 1000 ? (tokens / 1000).toFixed(1) + 'K'
+                     : String(tokens);
+        return `<div class="proxy-token-pill"><span class="tt-badge">${kb} KB</span><span class="tt-badge">~${tokStr} tokens</span></div>`;
       })()
     : '';
   const prevScrollTop = document.getElementById('proxyDetailCode')?.scrollTop ?? 0;
