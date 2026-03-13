@@ -20,12 +20,10 @@ Sentry.init({
   },
 });
 
-const { app, BrowserWindow, ipcMain, shell, dialog } = require('electron');
-const fs = require('fs');
+const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const path = require('path');
 const http = require('node:http');
 const https = require('node:https');
-const { Anthropic } = require('@anthropic-ai/sdk');
 
 let mainWin = null;
 let proxyServer = null;
@@ -107,39 +105,6 @@ app.whenReady().then(() => {
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
-});
-
-ipcMain.handle('send-to-claude', async (_event, { payload, apiKey }) => {
-  try {
-    const client = new Anthropic({ apiKey });
-    const response = await client.messages.create(payload);
-    return { response };
-  } catch (e) {
-    return { error: e.message };
-  }
-});
-
-ipcMain.handle('open-file', async () => {
-  const { canceled, filePaths } = await dialog.showOpenDialog({
-    properties: ['openFile'],
-    filters: [
-      { name: 'Markdown', extensions: ['md'] },
-      { name: 'All Files', extensions: ['*'] }
-    ],
-  });
-  if (canceled || !filePaths.length) return null;
-  try {
-    return { path: filePaths[0], content: fs.readFileSync(filePaths[0], 'utf-8') };
-  } catch (e) {
-    console.error('file read failed', e);
-    return { path: filePaths[0], content: null, error: e.message };
-  }
-});
-
-ipcMain.handle('get-token-estimate', (_event, text) => {
-  // Rough approximation: ~4 chars per token (cap at 10MB)
-  const s = (text || '').slice(0, 10_000_000);
-  return Math.ceil(s.length / 4);
 });
 
 ipcMain.handle('proxy-start', (_event, port = 9090) => {

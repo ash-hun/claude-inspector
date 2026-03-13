@@ -27,7 +27,6 @@
       "public/**",
       "assets/icon.png",
       "assets/icon.icns",
-      "node_modules/@anthropic-ai/sdk/**",
       "node_modules/@sentry/**",
       "node_modules/dotenv/**"
     ],
@@ -51,7 +50,6 @@
     }
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.78.0",
     "@sentry/electron": "^7.10.0",
     "dotenv": "^17.3.1"
   },
