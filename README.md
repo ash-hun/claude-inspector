@@ -148,6 +148,12 @@ Download the `.dmg` from the [Releases](https://github.com/kangraemin/claude-ins
 |---|---|
 | [Claude-Inspector-arm64.dmg](https://github.com/kangraemin/claude-inspector/releases/latest) | [Claude-Inspector-x64.dmg](https://github.com/kangraemin/claude-inspector/releases/latest) |
 
+### Upgrade
+
+```bash
+brew upgrade --cask claude-inspector && sleep 2 && open -a "Claude Inspector"
+```
+
 ### Uninstall
 
 ```bash

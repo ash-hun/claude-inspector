@@ -148,6 +148,12 @@ brew install --cask kangraemin/tap/claude-inspector && sleep 2 && open -a "Claud
 |---|---|
 | [Claude-Inspector-arm64.dmg](https://github.com/kangraemin/claude-inspector/releases/latest) | [Claude-Inspector-x64.dmg](https://github.com/kangraemin/claude-inspector/releases/latest) |
 
+### 업그레이드
+
+```bash
+brew upgrade --cask claude-inspector && sleep 2 && open -a "Claude Inspector"
+```
+
 ### 삭제
 
 ```bash
