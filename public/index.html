@@ -3399,7 +3399,7 @@ document.addEventListener('click', (e) => {
   // 캐시 적중률 높으면 절감 설명, 낮으면 생략
   let noteHtml = `<div class="token-popover-note">`;
   noteHtml += `💡 가격 기준일: ${d.pricingDate}`;
-  noteHtml += `<br>💰 모델마다 단가 다름`;
+  noteHtml += `<br>💰 모델마다 단가 다름 (<a href="https://docs.anthropic.com/en/docs/about-claude/models#model-comparison" style="color:var(--blue,#7aa2f7);text-decoration:underline;cursor:pointer" onclick="event.stopPropagation();require('electron').shell.openExternal(this.href);return false;">공식 문서</a>)`;
   noteHtml += `<br>📐 MTok = 백만 토큰 단위 가격`;
   if (d.cachePct >= 50) noteHtml += `<br>♻️ 캐시 ${d.cachePct}%: 입력 대부분을 캐시에서 저렴하게 읽어 비용 절감`;
   noteHtml += `</div>`;
