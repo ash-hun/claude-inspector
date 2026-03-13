@@ -633,7 +633,10 @@
     }
     .jt-exp-line {
       display: block; white-space: pre-wrap; word-break: break-word;
-      color: var(--orange);
+      color: var(--orange); min-height: 1.3em;
+    }
+    .jt-exp-line.mech-hl-text {
+      background: rgba(80,200,120,.15); outline: none; border-radius: 0;
     }
     .jt-lined .jt-exp-line::before {
       content: attr(data-ln);
