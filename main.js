@@ -194,9 +194,14 @@ ipcMain.handle('proxy-start', (_event, port = 9090) => {
       proxyServer = server;
       resolve({ running: true, port: server.address().port });
     });
+    let retried = false;
     server.on('error', (err) => {
-      if (err.code === 'EADDRINUSE') server.listen(0, '127.0.0.1');
-      else resolve({ error: err.message });
+      if (err.code === 'EADDRINUSE' && !retried) {
+        retried = true;
+        server.listen(0, '127.0.0.1');
+      } else {
+        resolve({ error: err.message });
+      }
     });
     server.listen(port, '127.0.0.1');
   });
