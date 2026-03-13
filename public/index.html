@@ -33,6 +33,7 @@
       background: var(--surface); -webkit-app-region: drag;
     }
     body.darwin .titlebar { display: block; }
+    body.darwin .header { padding-left: 76px; }
     .header { -webkit-app-region: drag; }
     .header-right, .header-right *, .logo { -webkit-app-region: no-drag; }
 
@@ -1105,42 +1106,46 @@ async function toggleProxy() {
   const btn = document.getElementById('proxyStartBtn');
   if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spin"></span>'; }
 
-  if (proxyRunning) {
-    await window.electronAPI.proxyStop();
-    window.electronAPI.offProxy();
-    proxyRunning = false;
-  } else {
-    // 기존 리스너 먼저 정리 후 새 리스너 등록 (누적 방지)
-    window.electronAPI.offProxy();
+  try {
+    if (proxyRunning) {
+      await window.electronAPI.proxyStop();
+      window.electronAPI.offProxy();
+      proxyRunning = false;
+    } else {
+      // 기존 리스너 먼저 정리 후 새 리스너 등록 (누적 방지)
+      window.electronAPI.offProxy();
 
-    const port = parseInt(document.getElementById('proxyPort').value) || 9090;
-    const result = await window.electronAPI.proxyStart(port);
-    if (result.error) {
-      alert(i18n.t('proxy.startFail') + result.error);
-      if (btn) { btn.disabled = false; btn.textContent = i18n.t('proxy.startProxy'); }
-      return;
-    }
-    proxyRunning = true;
-    proxyActualPort = result.port;
-    document.getElementById('proxyPort').value = result.port;
-
-    window.electronAPI.onProxyRequest((data) => {
-      proxyCaptures.unshift(data);
-      if (proxyCaptures.length > 50) proxyCaptures.pop();
-      debouncedRenderProxyList();
-    });
-    window.electronAPI.onProxyResponse((data) => {
-      const entry = proxyCaptures.find(e => e.id === data.id);
-      if (entry) {
-        entry.response = data;
-        debouncedRenderProxyList();
-        if (selectedProxyId === data.id) debouncedRenderProxyDetail();
+      const port = parseInt(document.getElementById('proxyPort').value) || 9090;
+      const result = await window.electronAPI.proxyStart(port);
+      if (result.error) {
+        alert(i18n.t('proxy.startFail') + result.error);
+        return;
       }
-    });
-  }
+      proxyRunning = true;
+      proxyActualPort = result.port;
+      document.getElementById('proxyPort').value = result.port;
 
-  if (btn) btn.disabled = false;
-  renderProxyStatus();
+      window.electronAPI.onProxyRequest((data) => {
+        proxyCaptures.unshift(data);
+        if (proxyCaptures.length > 50) proxyCaptures.pop();
+        debouncedRenderProxyList();
+      });
+      window.electronAPI.onProxyResponse((data) => {
+        const entry = proxyCaptures.find(e => e.id === data.id);
+        if (entry) {
+          entry.response = data;
+          debouncedRenderProxyList();
+          if (selectedProxyId === data.id) debouncedRenderProxyDetail();
+        }
+      });
+    }
+  } catch (err) {
+    console.error('toggleProxy error:', err);
+    alert(i18n.t('proxy.startFail') + (err.message || err));
+  } finally {
+    if (btn) btn.disabled = false;
+    renderProxyStatus();
+  }
 }
 
 function renderProxyList() {
