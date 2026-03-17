@@ -20,15 +20,15 @@ and visualizes all 5 prompt augmentation mechanisms.
 ---
 
 <p align="center">
-  <img src="public/screenshots/1.png" width="100%" alt="Proxy — Analysis view" />
+  <img src="public/screenshots/en-1.png" width="100%" alt="Proxy — Analysis view" />
 </p>
 
 <p align="center">
-  <img src="public/screenshots/2.png" width="100%" alt="Proxy — Request view with cost breakdown" />
+  <img src="public/screenshots/en-2.png" width="100%" alt="Proxy — Request view with cost breakdown" />
 </p>
 
 <p align="center">
-  <img src="public/screenshots/3.png" width="100%" alt="Proxy — Request view" />
+  <img src="public/screenshots/en-3.png" width="100%" alt="Proxy — Request view" />
 </p>
 
 ## What You'll Learn
